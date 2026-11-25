@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anmelden</title>
+    <link rel="icon" href="https://i.ibb.co/4wHYGtPD/Profilbild.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            color: black;
+            font-family: 'Open Sans', sans-serif;
+        }
+        body {
+            background-color: rgb(250, 246, 240);
+        }
+        header {
+            font-size: 3vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 5vh;
+            background-color: rgb(230, 226, 220);
+        }
+        form, div {
+            width: 20vw;
+            margin: 10vh auto 0;
+            display: flex;
+            flex-direction: column;
+            gap: 5vh;
+            align-items: center;
+        }
+        input {
+            width: 50%;
+            padding: 2%;
+            font-size: 100%;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: red;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 50%;
+            padding: 2%;
+            font-size: 100%;
+        }
+        @media (max-width: 1800px) {
+            form, div {
+                width: 100%;
+            }
+            input, button {
+                height: 5vh;
+                padding: 1px;
+                width: 25%;
+            }
+            #btnZurueck {
+                width: 15%;
+            }
+        }
+        @media (max-height: 720px) {
+            form, div {
+                gap: 3vh;
+            }
+            input, button {
+                padding: 0 1px 1px 1px;
+            }
+        }
+        @media (max-width: 800px) {
+            input, button {
+                width: 50%;
+            }
+            #btnZurueck {
+                width: 40%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>Anmelden</header>
+    <form id="nachAntwortSuchen">
+        <input type="text" id="name" name="name" placeholder="Dein Name" required>
+        <input type="email" id="email" name="email" placeholder="Deine E-Mail Adresse" required>
+        <input type="text" id="code" name="code" placeholder="Dein Code" required>
+        <button type="submit"><b>Anmelden</b></button>
+    </form>
+    <div style="display: none; border: 1px black; height: auto; white-space: pre-wrap;" id="anzeige">Lade Daten...</div>
+    <div class="zurueck" style="margin: 3vh auto 0;">
+        <button id="btnZurueck" style="background-color: rgb(0, 171, 255);" onclick="window.location.href='../index.html'"><b>Zurück</b></button>
+    </div>
+    <script>
+        const supabaseUrl = 'https://uwhijhrlnfgrgjcrdxzj.supabase.co'
+        const supabaseKey = 'sb_publishable_GB9zaLpCO733A51n_g8Y5w_QgTRKkTZ'
+        const tabellenName = 'Antworten'
+        const db = supabase.createClient(supabaseUrl, supabaseKey);
+        document.getElementById("nachAntwortSuchen").onsubmit = async () => {
+            event.preventDefault();
+            document.querySelectorAll("form *").forEach(element => {
+                element.style.display = "none";
+            });
+            anzeige.style.display = "flex";
+            const suchwert = document.getElementById("name").value.trim() + "," + document.getElementById("email").value.trim() + "," + document.getElementById("code").value.trim().toUpperCase();
+            const {data, error} = await db
+                .from(tabellenName)
+                .select('content')
+                .eq('data', suchwert)
+                .maybeSingle()
+            if (error) {
+                alert("Fehler beim Antworten auslesen.");
+                location.reload();
+            }
+            if (data && data.content && data.content.trim() !== "") {
+                anzeige.innerHTML = '<b>Du hast eine Antwort bekommen:</b>\n\n' + data.content;
+            } else if (data) {
+                anzeige.innerText = "Du hast noch keine Antwort bekommen.";
+            } else {
+                anzeige.innerHTML = 'Du hast dein Name, deine E-Mail Adresse oder dein Code falsch eingegeben. <a href="">Klicke hier um dich erneut anzumelden.</a>';
+            }
+        }
+    </script>
+</body>
+</html>
